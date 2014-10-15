@@ -44,11 +44,14 @@ function app(mousehandler) {
 
     self.mousestate = mousehandler;
 
+    self.title = ko.observable("first");
 
     self.selectedColor = ko.observable(new color(0, 0, 0));
     //self.colorPalette = ['Gray', 'DarkSlateBlue', 'red', 'ForestGreen', 'SandyBrown'];
 
-    self.colorPalette = [new color(250, 0, 0), new color(102, 0, 204), new color(255, 255, 0), new color(255, 102, 170)];
+    self.colorPalette = [new color(0, 0, 0), new color(208, 0, 0), new color(127, 255, 212), new color(0, 208, 0), new color(0, 0, 208), new color(106, 90, 205)];
+
+   
 
     self.width = 10;
     self.height = 10;
@@ -105,7 +108,7 @@ function app(mousehandler) {
 
         }
 
-        var pdata = { "data": temparray };
+        var pdata = { "data": temparray, "title":self.title() };
 
         console.log(temparray);
 

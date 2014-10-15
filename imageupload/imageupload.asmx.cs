@@ -27,9 +27,11 @@ namespace imageupload
     {
 
         [WebMethod]
-        public string UploadImage(byte[] data)
+        public string UploadImage(byte[] data, string title)
         {
 
+
+            string fulltitle = title + ".gif";
 
 
             PixelFormat pf = PixelFormats.Bgra32;
@@ -44,18 +46,26 @@ namespace imageupload
 
 
 
+
+
+
+
             TransformedBitmap transformedbitmap = new TransformedBitmap(bitmap, new ScaleTransform(3, 3));
 
-    
 
+            
+
+
+            
 
 
 
             //FileStream stream = new FileStream(@"D:\test.gif", FileMode.Create);
             //GifBitmapEncoder encoder = new GifBitmapEncoder();
 
-            BmpBitmapEncoder encoder = new BmpBitmapEncoder();
+            GifBitmapEncoder encoder = new GifBitmapEncoder();
 
+            
 
             encoder.Frames.Add(BitmapFrame.Create(transformedbitmap));
 
@@ -70,7 +80,7 @@ namespace imageupload
             PutObjectRequest request = new PutObjectRequest
             {
                 BucketName = "slofurnotest",
-                Key = "test.bmp",
+                Key = fulltitle,
             };
 
 
@@ -80,6 +90,8 @@ namespace imageupload
 
 
                  ms.Position = 0;
+
+                
 
                  request.InputStream = ms;
 

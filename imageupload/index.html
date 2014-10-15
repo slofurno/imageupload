@@ -27,7 +27,8 @@
     </div>
     <br />
 
-    <span data-bind="text:selectedColor().getColor()"></span>
+    <span data-bind="text:selectedColor().getColor()"></span><br />
+    <input data-bind='value:title' />
     <br />
     <br />
 
@@ -55,7 +56,16 @@
     var mousestate = {mousedown:false};
 
     $(document).on('mousedown', function (e) {
-        e.preventDefault();
+
+        console.log(e.target);
+
+        var target = $(e.target);
+        if (target.is("html, .pixelclass")) {
+            e.preventDefault();
+        }
+
+
+
 
         mousestate.mousedown = true;
 
