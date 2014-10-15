@@ -1,0 +1,7 @@
+C:\Steve\imageupload\imageupload\bin\imageupload.dll
+C:\Steve\imageupload\imageupload\bin\imageupload.pdb
+C:\Steve\imageupload\imageupload\obj\Debug\imageupload.dll
+C:\Steve\imageupload\imageupload\obj\Debug\imageupload.pdb
+C:\Steve\imageupload\imageupload\bin\AWSSDK.dll
+C:\Steve\imageupload\imageupload\bin\AWSSDK.pdb
+C:\Steve\imageupload\imageupload\obj\Debug\imageupload.csprojResolveAssemblyReference.cache

@@ -9,7 +9,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-
+using Amazon.S3;
+using Amazon.S3.Model;
 
 
 namespace imageupload
@@ -43,18 +44,74 @@ namespace imageupload
 
 
 
+            TransformedBitmap transformedbitmap = new TransformedBitmap(bitmap, new ScaleTransform(3, 3));
 
-            FileStream stream = new FileStream(@"D:\test.gif", FileMode.Create);
-            GifBitmapEncoder encoder = new GifBitmapEncoder();
-            
+    
 
 
-            encoder.Frames.Add(BitmapFrame.Create(bitmap));
-            encoder.Save(stream);
 
-            stream.Flush();
 
-            stream.Close();
+            //FileStream stream = new FileStream(@"D:\test.gif", FileMode.Create);
+            //GifBitmapEncoder encoder = new GifBitmapEncoder();
+
+            BmpBitmapEncoder encoder = new BmpBitmapEncoder();
+
+
+            encoder.Frames.Add(BitmapFrame.Create(transformedbitmap));
+
+
+
+            var s3client = new Amazon.S3.AmazonS3Client("AKIAJA3PK2CYTZEC5E6A", "vJIJRmV+kWU4J+Ex3veaFaohK7UU4aaYOy8ggEe9", Amazon.RegionEndpoint.USWest2);
+
+
+
+
+
+            PutObjectRequest request = new PutObjectRequest
+            {
+                BucketName = "slofurnotest",
+                Key = "test.bmp",
+            };
+
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                 encoder.Save(ms);
+
+
+                 ms.Position = 0;
+
+                 request.InputStream = ms;
+
+                 // Put object
+                 PutObjectResponse response = s3client.PutObject(request);
+                
+
+
+
+            }
+
+
+
+            /*
+            using (MemoryStream ms = new MemoryStream())
+            {
+                encoder.Save(ms);
+
+                request.InputStream = ms;
+               
+
+
+
+            }
+ 
+
+            */
+
+
+            //stream.Flush();
+
+            //stream.Close();
 
 
 
