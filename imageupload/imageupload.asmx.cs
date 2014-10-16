@@ -30,49 +30,63 @@ namespace imageupload
         public string UploadImage(byte[] data, string title)
         {
 
+           
+            var bitsperpixel = 4;
+
+            int oldwidth = 10;
+            int oldheight = 10;
+
+            int heightmulti = 100;
+            int widthmulti = 100;
+
+            var oldstride = oldwidth * bitsperpixel;
+            var newstride = oldstride * widthmulti;
+
+            var newheight = oldheight * heightmulti;
+
+            
+       
+
+
+           
+
+            byte[] newdata = scalePixels(data, oldwidth, oldheight, widthmulti, heightmulti);
+
+
+
+
+
 
             string fulltitle = title + ".gif";
 
 
             PixelFormat pf = PixelFormats.Bgra32;
 
-            int rawStride = (10 * pf.BitsPerPixel + 7) / 8;
+            int rawStride = (oldwidth*widthmulti * pf.BitsPerPixel + 7) / 8;
 
             BitmapPalette myPalette = BitmapPalettes.Halftone256;
 
-            BitmapSource bitmap = BitmapSource.Create(10, 10,
+            BitmapSource bitmap = BitmapSource.Create(oldwidth*widthmulti, oldheight*heightmulti,
                 96, 96, pf, myPalette,
-                data, rawStride);
+                newdata, rawStride);
 
 
 
 
-
-
-
-            TransformedBitmap transformedbitmap = new TransformedBitmap(bitmap, new ScaleTransform(3, 3));
-
-
-            
-
-
-            
-
-
-
-            //FileStream stream = new FileStream(@"D:\test.gif", FileMode.Create);
-            //GifBitmapEncoder encoder = new GifBitmapEncoder();
 
             GifBitmapEncoder encoder = new GifBitmapEncoder();
 
-            
+           
 
-            encoder.Frames.Add(BitmapFrame.Create(transformedbitmap));
+            //encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+
+
 
 
 
             var s3client = new Amazon.S3.AmazonS3Client("AKIAJA3PK2CYTZEC5E6A", "vJIJRmV+kWU4J+Ex3veaFaohK7UU4aaYOy8ggEe9", Amazon.RegionEndpoint.USWest2);
-
 
 
 
@@ -88,8 +102,11 @@ namespace imageupload
             {
                  encoder.Save(ms);
 
+                
 
-                 ms.Position = 0;
+
+
+
 
                 
 
@@ -165,6 +182,142 @@ namespace imageupload
 
             return "Hello World";
         }
+
+
+        static byte[] scalePixelsOld(byte[] data)
+        {
+
+            var bytesperpixel = 4;
+
+            int oldwidth = 10;
+            int oldheight = 10;
+
+            int heightmulti = 100;
+            int widthmulti = 100;
+
+            var oldstride = oldwidth * bytesperpixel;
+            var newstride = oldstride * widthmulti;
+
+            var newheight = oldheight * heightmulti;
+
+            byte[] newdata = new byte[newstride * oldheight * heightmulti];
+
+
+            for (int i = 0; i < (oldheight); i++)
+            {
+                for (int j = 0; j < (oldwidth); j++)
+                {
+
+
+                    for (int x = i * heightmulti; x < (i * heightmulti + heightmulti); x++)
+                    {
+
+                        for (int y = j * widthmulti; y < (j * widthmulti + widthmulti); y++)
+                        {
+
+                            var ok = x * oldwidth * widthmulti * 4 + y;
+                            var sure = i * oldwidth * 4 + j;
+
+                            newdata[x * newstride + y * bytesperpixel] = data[i * oldstride + j * bytesperpixel];
+                            newdata[x * newstride + y * bytesperpixel + 1] = data[i * oldstride + j * bytesperpixel + 1];
+                            newdata[x * newstride + y * bytesperpixel + 2] = data[i * oldstride + j * bytesperpixel + 2];
+                            newdata[x * newstride + y * bytesperpixel + 3] = data[i * oldstride + j * bytesperpixel + 3];
+
+
+                        }
+
+
+                    }
+
+
+
+                }
+
+
+
+            }
+
+            return newdata;
+
+        }
+
+
+        static unsafe byte[] scalePixels(byte[] data, int oldwidth, int oldheight, int widthmulti, int heightmulti)
+        {
+
+
+
+            var bytesperpixel = 4;
+
+ 
+
+            var oldstride = oldwidth * bytesperpixel;
+            var newstride = oldstride * widthmulti;
+
+            var newheight = oldheight * heightmulti;
+
+
+
+
+            byte[] newdata = new byte[newstride * oldheight * heightmulti];
+
+
+            bytesperpixel = 1;
+            oldstride = oldwidth * bytesperpixel;
+            newstride = oldstride * widthmulti;
+
+
+            fixed (byte* sourcepointer = data, targetpointer = newdata)
+            {
+
+                UInt32* source = (UInt32*)sourcepointer;
+                UInt32* target = (UInt32*)targetpointer;
+
+
+                for (int i = 0; i < (oldheight); i++)
+                {
+                    for (int j = 0; j < (oldwidth); j++)
+                    {
+
+
+                        for (int x = i * heightmulti; x < (i * heightmulti + heightmulti); x++)
+                        {
+
+                            for (int y = j * widthmulti; y < (j * widthmulti + widthmulti); y++)
+                            {
+
+                                var ok = x * oldwidth * widthmulti * bytesperpixel + y;
+                                var sure = i * oldwidth * bytesperpixel + j;
+
+                                target[x * newstride + y * bytesperpixel] = source[i * oldstride + j * bytesperpixel];
+                                //target[x * newstride + y * bytesperpixel + 1] = source[i * oldstride + j * bytesperpixel + 1];
+                                //target[x * newstride + y * bytesperpixel + 2] = source[i * oldstride + j * bytesperpixel + 2];
+                                //target[x * newstride + y * bytesperpixel + 3] = source[i * oldstride + j * bytesperpixel + 3];
+
+
+                            }
+
+
+                        }
+
+
+
+                    }
+
+
+
+                }
+
+
+            }
+            return newdata;
+
+
+
+
+
+        }
+
 
 
     }

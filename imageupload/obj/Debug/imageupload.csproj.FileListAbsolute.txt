@@ -1,7 +1,5 @@
-C:\Steve\imageupload\imageupload\bin\imageupload.dll
-C:\Steve\imageupload\imageupload\bin\imageupload.pdb
-C:\Steve\imageupload\imageupload\obj\Debug\imageupload.dll
-C:\Steve\imageupload\imageupload\obj\Debug\imageupload.pdb
-C:\Steve\imageupload\imageupload\bin\AWSSDK.dll
-C:\Steve\imageupload\imageupload\bin\AWSSDK.pdb
-C:\Steve\imageupload\imageupload\obj\Debug\imageupload.csprojResolveAssemblyReference.cache
+D:\data\source\imageupload\imageupload\bin\imageupload.dll.config
+D:\data\source\imageupload\imageupload\bin\imageupload.dll
+D:\data\source\imageupload\imageupload\bin\imageupload.pdb
+D:\data\source\imageupload\imageupload\obj\Debug\imageupload.dll
+D:\data\source\imageupload\imageupload\obj\Debug\imageupload.pdb

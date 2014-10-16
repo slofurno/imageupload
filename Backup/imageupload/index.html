@@ -1,0 +1,92 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style>
+        .pixelclass {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            float: left;
+        }
+    </style>
+
+    <script src="Scripts/jquery-1.11.1.min.js"></script>
+    <script src="Scripts/knockout-3.2.0.debug.js"></script>
+    <script src="app.js"></script>
+
+
+</head>
+<body>
+
+    <div data-bind="foreach: colorPalette">
+        <div class="pixelclass" data-bind="style: {backgroundColor: $data.getColor()}, click: $root.setColor">
+            <span data-bind="text:$index"></span>
+        </div>
+
+    </div>
+    <br />
+
+    <span data-bind="text:selectedColor().getColor()"></span><br />
+    <input data-bind='value:title' />
+    <br />
+    <br />
+
+    <div data-bind="foreach: pixels" style="width:300px;">
+
+        <div class="pixelclass" data-bind="style: { backgroundColor: myColor().getColor() }  , event: {mouseover: $root.setPixelColor}">
+            ?
+        </div>
+
+
+
+    </div>
+
+
+    <br />
+    <button data-bind="click:submitImage ">submit</button>
+
+
+    <script>
+
+
+    //click: function(){$root.setColor($index())}
+    //click: function(){changeColor( $root.selectedColor() )}
+
+    var mousestate = {mousedown:false};
+
+    $(document).on('mousedown', function (e) {
+
+        console.log(e.target);
+
+        var target = $(e.target);
+        if (target.is("html, .pixelclass")) {
+            e.preventDefault();
+        }
+
+
+
+
+        mousestate.mousedown = true;
+
+    });
+
+    $(document).on('mouseup', function (e) {
+
+
+        mousestate.mousedown = false;
+
+    });
+
+
+    var temp = new app(mousestate);
+
+    ko.applyBindings(temp);
+
+
+
+    </script>
+
+
+</body>
+</html>
