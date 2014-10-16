@@ -11,7 +11,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using Amazon.S3;
 using Amazon.S3.Model;
-
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace imageupload
 {
@@ -30,7 +32,10 @@ namespace imageupload
         public string UploadImage(byte[] data, string title)
         {
 
-           
+
+            Stopwatch stopWatch = new Stopwatch();
+
+
             var bitsperpixel = 4;
 
             int oldwidth = 10;
@@ -54,11 +59,17 @@ namespace imageupload
 
 
 
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts = stopWatch.Elapsed;
+            
 
-
+            stopWatch.Reset();
+            stopWatch.Start();
 
             string fulltitle = title + ".gif";
 
+            
 
             PixelFormat pf = PixelFormats.Bgra32;
 
@@ -82,12 +93,14 @@ namespace imageupload
 
             encoder.Frames.Add(BitmapFrame.Create(bitmap));
 
+            MemoryStream ms = new MemoryStream();
 
+            encoder.Save(ms);
 
-
+            
 
             var s3client = new Amazon.S3.AmazonS3Client("AKIAJA3PK2CYTZEC5E6A", "vJIJRmV+kWU4J+Ex3veaFaohK7UU4aaYOy8ggEe9", Amazon.RegionEndpoint.USWest2);
-
+            IAsyncResult asyncResult;
 
 
 
@@ -98,91 +111,169 @@ namespace imageupload
             };
 
 
-            using (MemoryStream ms = new MemoryStream())
+
+            var requestlist = new List<PutObjectRequest>();
+
+
+            for (int i = 0; i < 50; i++)
             {
+
+                PutObjectRequest temprequest = new PutObjectRequest
+                {
+                    BucketName = "slofurnotest",
+                    Key = (title + i.ToString() + ".gif"),
+                };
+
+                MemoryStream tempms = new MemoryStream();
+                ms.Position = 0;
+                ms.CopyTo(tempms);
+
+
+
+                temprequest.InputStream = tempms;
+
+                requestlist.Add(temprequest);
+
+
+            }
+
+
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts3 = stopWatch.Elapsed;
+
+
+            stopWatch.Reset();
+            stopWatch.Start();
+
+
+
+            StartUploadAsync(s3client, requestlist);
+
+
+           
+
+            /*
+            MemoryStream ms = new MemoryStream();
+            
                  encoder.Save(ms);
 
+
+
+
                 
-
-
-
-
-
+            
                 
 
                  request.InputStream = ms;
 
                  // Put object
-                 PutObjectResponse response = s3client.PutObject(request);
-                
+                 //PutObjectResponse response = s3client.PutObject(request);
 
-
-
-            }
-
-
-
-            /*
-            using (MemoryStream ms = new MemoryStream())
-            {
-                encoder.Save(ms);
-
-                request.InputStream = ms;
-               
-
-
-
-            }
- 
-
+                 asyncResult = s3client.BeginPutObject(request, CallbackWithState, new ClientState { Client = s3client, Start = DateTime.Now });
             */
 
+            
 
-            //stream.Flush();
-
-            //stream.Close();
-
-
-
-            /*
-
-            Bitmap bmp = new Bitmap(10, 10, PixelFormat.Format32bppArgb);
-            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, bmp.PixelFormat);
-            Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
-            bmp.UnlockBits(bmpData);
-            bmp.Save(@"TestImage.gif", ImageFormat.Gif);
-
-            */
-            //temp.Save(@"test.bmp");
-
-
-            /*
-
-            Bitmap bmp = new Bitmap(10, 10, PixelFormat.Format32bppArgb);
-
-           
-           
-
-            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-            System.Drawing.Imaging.BitmapData bmpData =
-                bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
-                bmp.PixelFormat);
-
-            int bytes = Math.Abs(bmpData.Stride) * bmp.Height;
-
-            IntPtr ptr = bmpData.Scan0;
-
-
-            System.Runtime.InteropServices.Marshal.Copy(data, 0, ptr, bytes);
-
-            bmp.UnlockBits(bmpData);
-            */
+            
 
 
 
-            return "Hello World";
+            stopWatch.Stop();
+            TimeSpan ts2 = stopWatch.Elapsed;
+
+
+            String responsestring = ("Scale runtime " + ts.TotalMilliseconds + "Memory copy runtine : " + ts3.TotalMilliseconds + " Upload runtime " + ts2.TotalMilliseconds);
+
+
+
+            // Get the elapsed time as a TimeSpan value.
+            
+            
+
+
+            return responsestring;
         }
 
+
+        static Task UploadFileAsync(AmazonS3Client s3client, PutObjectRequest request)
+        {
+            
+
+
+            Task result = Task.Factory.StartNew(() => s3client.BeginPutObject(request, CallbackWithState, new ClientState { Client = s3client, Start = DateTime.Now }));
+
+
+            return result;
+            /*
+            Task<PutObjectResponse> response =
+                Task.Factory.FromAsync<PutObjectRequest, PutObjectResponse>(
+                    s3client.BeginPutObject, s3client.EndPutObject, request, new ClientState { Client = s3client, Start = DateTime.Now }
+                );
+
+
+
+            return response;
+            */
+        }
+
+
+        static Task[] UploadAsync(AmazonS3Client s3, IEnumerable<PutObjectRequest> requests)
+        {
+
+            return requests.Select(r => UploadFileAsync(s3, r)).ToArray();
+
+            //return requests.Select(r => UploadFileAsync(s3, r)).ToArray();
+        }
+
+        static void StartUploadAsync(AmazonS3Client s3, IEnumerable<PutObjectRequest> requests)
+        {
+            Task[] tasks = UploadAsync(s3, requests);
+            Task.WaitAll(tasks);
+
+
+            //return tasks.Select(t => t.result).ToList();
+        }
+
+
+
+        public static void SimpleCallback(IAsyncResult asyncResult)
+        {
+            Console.WriteLine("Finished PutObject operation with simple callback");
+            Console.Write("\n\n");
+        }
+
+
+        public static void CallbackWithClient(IAsyncResult asyncResult)
+        {
+            try
+            {
+                AmazonS3Client s3Client = (AmazonS3Client)asyncResult.AsyncState;
+                PutObjectResponse response = s3Client.EndPutObject(asyncResult);
+                Console.WriteLine("Finished PutObject operation with client callback");
+            }
+            catch (AmazonS3Exception s3Exception)
+            {
+
+            }
+        }
+
+
+        public static void CallbackWithState(IAsyncResult asyncResult)
+        {
+            try
+            {
+                ClientState state = asyncResult.AsyncState as ClientState;
+                AmazonS3Client s3Client = (AmazonS3Client)state.Client;
+                PutObjectResponse response = state.Client.EndPutObject(asyncResult);
+                Debug.WriteLine("Finished PutObject. Elapsed time: {0}",
+                  (DateTime.Now - state.Start).ToString());
+            }
+            catch (AmazonS3Exception s3Exception)
+            {
+            
+            }
+        }
 
         static byte[] scalePixelsOld(byte[] data)
         {
@@ -286,13 +377,10 @@ namespace imageupload
                             for (int y = j * widthmulti; y < (j * widthmulti + widthmulti); y++)
                             {
 
-                                var ok = x * oldwidth * widthmulti * bytesperpixel + y;
-                                var sure = i * oldwidth * bytesperpixel + j;
+                             
 
                                 target[x * newstride + y * bytesperpixel] = source[i * oldstride + j * bytesperpixel];
-                                //target[x * newstride + y * bytesperpixel + 1] = source[i * oldstride + j * bytesperpixel + 1];
-                                //target[x * newstride + y * bytesperpixel + 2] = source[i * oldstride + j * bytesperpixel + 2];
-                                //target[x * newstride + y * bytesperpixel + 3] = source[i * oldstride + j * bytesperpixel + 3];
+                                
 
 
                             }
@@ -320,5 +408,23 @@ namespace imageupload
 
 
 
+    }
+
+    class ClientState
+    {
+        AmazonS3Client client;
+        DateTime startTime;
+
+        public AmazonS3Client Client
+        {
+            get { return client; }
+            set { client = value; }
+        }
+
+        public DateTime Start
+        {
+            get { return startTime; }
+            set { startTime = value; }
+        }
     }
 }

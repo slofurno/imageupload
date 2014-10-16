@@ -115,7 +115,7 @@ function app(mousehandler) {
         $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
-            url: "/imageupload.asmx/UploadImage",
+            url: "imageupload.asmx/UploadImage",
             data: JSON.stringify(pdata),
             dataType: "json",
             async: true,
