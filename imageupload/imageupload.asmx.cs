@@ -14,8 +14,12 @@ using Amazon.S3.Model;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Threading;
+using Newtonsoft.Json;
+using System.Web.Script.Serialization;
+using System.Web.Script.Services;
 
 namespace imageupload
+    
 {
     /// <summary>
     /// Summary description for fileupload
@@ -27,6 +31,111 @@ namespace imageupload
     [System.Web.Script.Services.ScriptService]
     public class imageupload : System.Web.Services.WebService
     {
+
+        
+
+        [WebMethod]
+        [ScriptMethod(UseHttpGet = true, ResponseFormat = ResponseFormat.Json)]
+        public string[] GetImages()
+        {
+
+            var s3client = new Amazon.S3.AmazonS3Client("AKIAJA3PK2CYTZEC5E6A", "vJIJRmV+kWU4J+Ex3veaFaohK7UU4aaYOy8ggEe9", Amazon.RegionEndpoint.USWest2);
+
+
+            ListObjectsRequest listrequest = new ListObjectsRequest();
+
+            listrequest.BucketName = "slofurnotest";
+           // listrequest.Prefix = "First";
+
+
+            ListObjectsResponse response = new ListObjectsResponse();
+
+
+            response = ListAsync(listrequest, s3client).Result;
+
+
+            List<String> filelist = new List<String>();
+
+
+            string baseuri = "https://s3-us-west-2.amazonaws.com/slofurnotest/";
+
+            foreach (S3Object obj in response.S3Objects)
+            {
+               
+
+                filelist.Add((baseuri + obj.Key));
+
+
+            }
+
+
+            return filelist.ToArray();
+
+            
+
+
+            /*
+
+            List<GetObjectRequest> requestlist = new List<GetObjectRequest>();
+
+
+            foreach (S3Object obj in response.S3Objects)
+            {
+                Debug.WriteLine("Object - " + obj.Key);
+
+                requestlist.Add(new GetObjectRequest{
+                    BucketName = "slofurnotest",
+                    Key = obj.Key
+                });
+
+
+            }
+
+            Task<MemoryStream>[] tasks = requestlist.Select(r => GetObjectAsync(r, s3client)).ToArray();
+            
+            Task.WaitAll(tasks);
+
+            List<MemoryStream> resultslist = tasks.Select(t => t.Result).ToList();
+
+            */
+
+
+
+
+        }
+
+
+        
+
+
+        public static Task<ListObjectsResponse> ListAsync(ListObjectsRequest request, AmazonS3Client client)
+        {
+
+
+            return Task<ListObjectsResponse>.Factory.FromAsync(client.BeginListObjects, client.EndListObjects, request, null);
+
+        }
+
+        public static Task<MemoryStream> GetObjectAsync(GetObjectRequest request, AmazonS3Client client)
+        {
+
+
+            Task<GetObjectResponse> response = Task<GetObjectResponse>.Factory.FromAsync(client.BeginGetObject, client.EndGetObject, request, null);
+
+            Task<MemoryStream> translation = response.ContinueWith(t =>
+            {
+                using (Task<GetObjectResponse> resp = t)
+                {
+                    var ms = new MemoryStream();
+                    t.Result.ResponseStream.CopyTo(ms);
+                    return ms;
+                }
+            });
+
+            return translation;
+
+
+        }
 
         [WebMethod]
         public string UploadImage(byte[] data, string title)
@@ -228,6 +337,8 @@ namespace imageupload
 
         static void StartUploadAsync(AmazonS3Client s3, IEnumerable<PutObjectRequest> requests)
         {
+
+           
             Task[] tasks = UploadAsync(s3, requests);
             Task.WaitAll(tasks);
 

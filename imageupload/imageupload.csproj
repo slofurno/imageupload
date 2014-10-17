@@ -48,6 +48,9 @@
       <HintPath>..\..\..\Users\marayabgt\Documents\Visual Studio 2010\Projects\BGT_S4C_SPEAKER_COST\packages\AWSSDK.2.0.5.0\lib\net35\AWSSDK.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Users\marayabgt\Downloads\Json60r5\Bin\Net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Data" />

@@ -92,6 +92,25 @@ function app(mousehandler) {
 
     };
 
+
+    self.getImages = function () {
+
+        $.ajax({
+            type: "GET",
+            url: "imageupload.asmx/GetImages",
+            async: true,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data, status) {
+
+                console.log(data.d);
+
+            }
+        });
+
+
+    };
+
     self.submitImage = function () {
 
         var temparray = [];

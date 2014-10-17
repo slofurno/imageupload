@@ -4,3 +4,7 @@ C:\Steve\imageupload\imageupload\bin\AWSSDK.dll
 C:\Steve\imageupload\imageupload\bin\AWSSDK.pdb
 C:\Steve\imageupload\imageupload\obj\Debug\imageupload.dll
 C:\Steve\imageupload\imageupload\obj\Debug\imageupload.pdb
+C:\Steve\imageupload\imageupload\bin\Newtonsoft.Json.dll
+C:\Steve\imageupload\imageupload\bin\Newtonsoft.Json.pdb
+C:\Steve\imageupload\imageupload\bin\Newtonsoft.Json.xml
+C:\Steve\imageupload\imageupload\obj\Debug\imageupload.csprojResolveAssemblyReference.cache
