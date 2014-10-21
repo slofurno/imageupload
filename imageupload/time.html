@@ -1,0 +1,83 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style>
+        .pixelclass {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            float: left;
+        }
+    </style>
+
+    <script src="Scripts/jquery-1.11.1.min.js"></script>
+    <script src="Scripts/knockout-3.2.0.debug.js"></script>
+    <script src="timeapp.js"></script>
+
+
+</head>
+<body>
+
+    
+    
+
+    <div id="main" style="display:inline-block; width:600px; height:400px; background-color:Gray" data-bind="event:{mousedown:setDown, mouseup:setUp}">
+
+    <div data-bind="foreach : blocks">
+    
+    <div style="position:absolute" data-bind="style:{top:top, left:left, height:height, width:width, backgroundColor:selected() ? 'red' : 'black', zIndex:selected() ? 5 : 0}, event:{mousedown:$parent.selectBlock}"></div>
+    
+    
+
+        <!-- ko if: selected() -->
+
+        <div style="position:absolute; width:0px; height:0px; background-color:Green; border:10px solid Green; margin-left:-10px; margin-top:-10px; z-index:10" data-bind="style{top:startpoint.y+'px', left:startpoint.x+'px'} event:{mousedown:$parent.startResize}">
+        
+        </div> 
+
+        <div style="position:absolute; background-color:Green; border:10px solid Green; margin-left:-10px; margin-top:-10px; z-index:10" data-bind="style:{top:endpoint.y+'px', left:endpoint.x+'px'}">
+        
+        </div> 
+
+
+        <!-- /ko -->
+
+
+    
+    </div>
+
+
+    </div>
+
+
+    <div style="display:inline-block; vertical-align:top;" data-bind="foreach : blocks">
+        <div data-bind="event:{mousedown:$parent.selectBlock}">
+        <span data-bind="text:height"></span>
+        <span data-bind="text:width"></span>
+        <span data-bind="text:selected"></span>
+        </div>
+        
+
+
+
+    </div>
+
+    <script>
+
+
+
+        
+
+
+        var temp = new timeapp();
+
+        ko.applyBindings(temp);
+
+
+
+    </script>
+
+
+</body>
+</html>
