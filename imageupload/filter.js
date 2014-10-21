@@ -30,7 +30,7 @@ function Filter2(somefilter) {
 
 }
 
-function Filter(name, url, np, filter) {
+function Filter(name, url, filter) {
 
     var self = this;
 
@@ -38,7 +38,7 @@ function Filter(name, url, np, filter) {
 
     this.list = ko.observableArray([]);
 
-    this.nameproperty = np;
+ 
 
     this.name = ko.observable(name);
 
@@ -66,13 +66,78 @@ function FilterViewModel(data) {
 
     this.data = data;
 
+    
+
     this.options = ['Account id', 'speaker id', 'topic'];
 
     this.chosenOption = ko.observable();
 
     this.filters = ko.observableArray([]);
 
-    this.filterarray = ko.observableArray([new Filter('Account', 'api/account', function (item, match) { return item.lastName == match; }), new Filter('User', 'api/user', function (item, match) { return item.users.indexOf(match) >= 0; }), new Filter('Topic', 'api/topic', function (item, match) { return item.topics.indexOf(match)>= 0 })]);
+    this.filterarray = ko.observableArray([
+
+        new Filter('Account', 'api/account', function (item, match) {
+                
+            var contains = false;
+ 
+
+            //$.each(item["initiativeAccount"], function (i, value) {
+
+            console.log("match " + match["id"]);
+            console.log("account " + item["initiativeAccount"]["accountId"]);
+
+            if (item["initiativeAccount"]["accountId"] == match['id']) { contains = true;  }
+
+
+            //    if (value['accountId'] == match['id']) { contains = true; return false; }
+            //})
+
+
+            return contains;
+
+        }), new Filter('User', 'api/user', function (item, match) {
+
+            var contains = false;
+
+            
+
+            console.log("users " + item["users"]);
+//
+           
+
+
+               // console.log("match " + match["id"]);
+
+                $.each(item["users"], function (i, value) {
+
+                    console.log(value["userId"]);
+                    if (value['userId'] == match['id']) { contains = true; return false; }
+                })
+            
+        
+            return contains;
+
+
+         }), new Filter('Topic', 'api/topic', function (item, match) {
+    
+
+             var contains = false;
+
+
+             $.each(item["topics"], function (i, value) {
+
+                 console.log(value["topicId"]);
+                 if (value['topicId'] == match['id']) { contains = true; return false; }
+             })
+
+
+      
+
+            return contains;
+
+         })
+
+    ]);
 
     this.chosenOption.subscribe(function (newValue) {
         if (newValue != null) {
@@ -96,6 +161,50 @@ function FilterViewModel(data) {
         self.filters.remove(this);
 
     };
+
+
+    this.filteredData = ko.computed(function () {
+
+        var temp;
+
+        return ko.utils.arrayFilter(self.data, function (item) {
+
+            var passed = true;
+
+            ko.utils.arrayForEach(self.filters(), function (value) {
+
+
+                if (value.selectedOption() != undefined) {
+
+                    console.log(value.selectedOption());
+
+                    if (value.filter.filter(item, value.selectedOption())) {
+
+                       
+
+
+
+                    }
+                    else {
+                        passed = false;
+                        return false;
+
+                    }
+
+                }
+     
+
+
+
+            });
+
+            return passed;
+
+
+
+        });
+
+    });
 
 }
 
