@@ -1,0 +1,82 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style>
+        .pixelclass {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            float: left;
+        }
+    </style>
+
+    <script src="Scripts/jquery-1.11.1.min.js"></script>
+    <script src="Scripts/knockout-3.2.0.debug.js"></script>
+
+    <script src="filter.js"></script>
+
+
+</head>
+<body>
+
+    <script>
+
+        var fakedata = {};
+
+
+    </script>
+    
+
+    <div data-bind="foreach : filters">
+
+        <div style="height:50px; width:400px; border:1px solid gray">
+
+            <select data-bind="options:filter.list, optionsText: 'name', value:selectedOption"></select>
+           
+            <a href="#" data-bind="click:$root.removeFilter">remove</a>
+
+        </div>
+
+
+
+    </div>
+
+    <div style="height:50px; width:400px; border:1px solid gray">
+        <select data-bind="options:filterarray, optionsText: 'name', value:chosenOption, optionsCaption:'Select new filter type...'"></select>
+
+
+  </div>
+
+
+
+    <script>
+
+
+    //click: function(){$root.setColor($index())}
+    //click: function(){changeColor( $root.selectedColor() )}
+
+
+
+        $.get("api/Initiative", function (data) {
+           
+
+            var temp = new FilterViewModel(data);
+
+            ko.applyBindings(temp);
+
+
+
+        });
+
+
+
+
+
+
+
+    </script>
+
+
+</body>
+</html>
