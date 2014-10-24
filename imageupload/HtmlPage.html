@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <script src="Scripts/jquery-1.11.1.js"></script>
+</head>
+<body>
+
+    <script>
+
+        var uri = "wss://s-dal5-nss-28.firebaseio.com/.ws?v=5&ns=shining-torch-9738";
+        var test = '{"t":"d","d":{"r":1,"a":"l","b":{"p":"/","h":""}}}';
+        var first = true;
+
+        var temp = new WebSocket(uri);
+
+        temp.onopen = function (e) {
+
+            console.log(e);
+
+
+        };
+
+        temp.onerror = function (e) {
+
+            console.log(e);
+
+
+        };
+        temp.onmessage = function (e) {
+
+            console.log(e);
+            if (first) {
+                temp.send(test);
+                first = false;
+            }
+
+
+        };
+
+        
+
+        
+
+
+
+    </script>
+
+
+
+</body>
+</html>
