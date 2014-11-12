@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+
+    <script src="Scripts/jquery-1.11.1.min.js"></script>
+    <script src="js/select.js"></script>
+</head>
+<body>
+
+    <canvas id="ctx" width="800" height="600"></canvas>
+
+
+    <script>
+
+        var canvas = document.getElementById("ctx");
+        var width = 800;
+        var height = 600;
+        var ctx = canvas.getContext("2d");
+
+        var AF = window.requestAnimationFrame;
+
+        function drawline(x1, y1, x2, y2) {
+
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+
+            ctx.strokeStyle = "blue";
+            ctx.stroke();
+
+        };
+
+        function drawrect(x1, y1, x2, y2) {
+
+            ctx.rect(x1, y1, x2 - x1, y2 - y1);
+            ctx.stroke();
+
+        };
+
+        function clearrect() {
+
+            ctx.clearRect(0, 0, width, height);
+        };
+
+
+        function draw() {
+            clearrect();
+
+
+            drawline(20, 20, 400, 400);
+            drawrect(20, 20, 400, 400);
+
+
+            AF(draw);
+        };
+
+        draw();
+
+    </script>
+
+
+</body>
+</html>
