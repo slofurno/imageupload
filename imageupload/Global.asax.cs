@@ -7,6 +7,7 @@ using System.Web.SessionState;
 using System.Web.Http;
 using System.Web.Routing;
 
+
 namespace imageupload
 {
     public class Global : System.Web.HttpApplication
@@ -16,8 +17,8 @@ namespace imageupload
         {
           
             WebApiConfig.Register(GlobalConfiguration.Configuration);
-           
-          
+
+            GlobalConfiguration.Configuration.Formatters.XmlFormatter.UseXmlSerializer = true;
 
         }
 

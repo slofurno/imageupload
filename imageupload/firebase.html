@@ -15,6 +15,7 @@
           margin: 1px;
           display: inline-block;
           border: 3px solid black; 
+          position: fixed;
 
         }
     </style>
@@ -26,94 +27,149 @@
     <script src='https://cdn.firebase.com/js/client/1.1.1/firebase.js'></script>
     </head>
 <body>
-    <div class="l-demo-container">
-        <canvas id="drawing-canvas" width="480" height="420"></canvas>
-    </div>
-    <div id="colorholder"></div>
+    <canvas id="drawing-canvas" width="480" height="420"></canvas>
+    <div id="tempdiv" class="colorbox">?</div>
+
     <script>
+
+
+
         $(document).ready(function () {
-            //Set up some globals
-            var pixSize = 8, lastPoint = null, currentColor = "000", mouseDown = 0;
-
-            //Create a reference to the pixel data for our drawing.
-            var pixelDataRef = new Firebase('https://shining-torch-9738.firebaseio.com/');
-
-            // Set up our canvas
+          
             var myCanvas = document.getElementById('drawing-canvas');
             var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
-            if (myContext == null) {
-                alert("You must use a browser that supports HTML5 Canvas to run this demo.");
-                return;
-            }
+            myContext.fillStyle = "blue";
 
-            //Setup each color palette & add it to the screen
-            var colors = ["fff", "000", "f00", "0f0", "00f", "88f", "f8d", "f88", "f05", "f80", "0f8", "cf0", "08f", "408", "ff8", "8ff"];
-            for (c in colors) {
-                var item = $('<div/>').css("background-color", '#' + colors[c]).addClass("colorbox");
-                item.click((function () {
-                    var col = colors[c];
-                    return function () {
-                        currentColor = col;
-                    };
-                })());
-                item.appendTo('#colorholder');
-            }
 
-            //Keep track of if the mouse is up or down
-            myCanvas.onmousedown = function () { mouseDown = 1; };
-            myCanvas.onmouseout = myCanvas.onmouseup = function () {
-                mouseDown = 0; lastPoint = null;
-            };
+            var keystate = {87:false, 65:false, 83:false, 68:false};
+            //Create a reference to the pixel data for our drawing.
+            var firebase = new Firebase('https://shining-torch-9738.firebaseio.com/');
 
-            //Draw a line from the mouse's last position to its current position
-            var drawLineOnMouseMove = function (e) {
-                if (!mouseDown) return;
+            var myref = firebase.push();
 
-                e.preventDefault();
+            var starttime = new Date();
+            var oldtime = new Date();
 
-                // Bresenham's line algorithm. We use this to ensure smooth lines are drawn
-                var offset = $('canvas').offset();
-                var x1 = Math.floor((e.pageX - offset.left) / pixSize - 1),
-                  y1 = Math.floor((e.pageY - offset.top) / pixSize - 1);
-                var x0 = (lastPoint == null) ? x1 : lastPoint[0];
-                var y0 = (lastPoint == null) ? y1 : lastPoint[1];
-                var dx = Math.abs(x1 - x0), dy = Math.abs(y1 - y0);
-                var sx = (x0 < x1) ? 1 : -1, sy = (y0 < y1) ? 1 : -1, err = dx - dy;
-                while (true) {
-                    //write the pixel into Firebase, or if we are drawing white, remove the pixel
-                    pixelDataRef.child(x0 + ":" + y0).set(currentColor === "fff" ? null : currentColor);
+            var stride = 100;
+            var div = $("#tempdiv");
+            var s = { x: 400, y: 400 };
 
-                    if (x0 == x1 && y0 == y1) break;
-                    var e2 = 2 * err;
-                    if (e2 > -dy) {
-                        err = err - dy;
-                        x0 = x0 + sx;
-                    }
-                    if (e2 < dx) {
-                        err = err + dx;
-                        y0 = y0 + sy;
+            var width = myCanvas.width;
+            var height = myCanvas.height;
+
+            divlist = {};
+
+            console.log(div);
+
+            function Draw() {
+
+                var newtime = new Date();
+
+                var dt = (newtime - oldtime)/1000.0;
+
+                
+
+
+                myref.set(s);
+                //console.log(s.x);
+
+                if (keystate[87]) {
+                    s.y -= (stride * dt)|0;
+
+                }
+                if (keystate[83]) {
+                    s.y += (stride * dt)|0;
+
+                }
+                if (keystate[65]) {
+                    s.x -= (stride * dt)|0;
+
+                }
+                if (keystate[68]) {
+                    s.x += (stride * dt)|0;
+
+                }
+
+                
+
+                var temp;
+
+                myContext.clearRect(0,0,myCanvas.width, myCanvas.height)
+
+                for (var property in divlist) {
+                    if (divlist.hasOwnProperty(property)) {
+
+                        temp = divlist[property];
+
+                        console.log(property);
+
+                        myContext.fillRect(temp.x|0, temp.y|0, 10, 10);
+
                     }
                 }
-                lastPoint = [x1, y1];
-            };
-            $(myCanvas).mousemove(drawLineOnMouseMove);
-            $(myCanvas).mousedown(drawLineOnMouseMove);
 
-            // Add callbacks that are fired any time the pixel data changes and adjusts the canvas appropriately.
-            // Note that child_added events will be fired for initial pixel data as well.
-            var drawPixel = function (snapshot) {
-                var coords = snapshot.name().split(":");
-                myContext.fillStyle = "#" + snapshot.val();
-                myContext.fillRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
+                
+
+                //div.offset({ top: s.y, left: s.x });
+
+                
+                
+
+                oldtime = newtime;
+
+                window.requestAnimationFrame(Draw);
+
             };
-            var clearPixel = function (snapshot) {
-                var coords = snapshot.name().split(":");
-                myContext.clearRect(parseInt(coords[0]) * pixSize, parseInt(coords[1]) * pixSize, pixSize, pixSize);
-            };
-            pixelDataRef.on('child_added', drawPixel);
-            pixelDataRef.on('child_changed', drawPixel);
-            pixelDataRef.on('child_removed', clearPixel);
+
+            //87 65 83 68
+
+
+            $(document).on("keydown", function (e) {
+                
+                
+
+                keystate[e.which] = true;
+
+
+
+
+            });
+
+
+
+            $(document).on("keyup", function (e) {
+
+                keystate[e.which] = false;
+
+            });
+
+     
+            firebase.on("child_changed", function (data) {
+
+                
+
+                
+
+                    divlist[data.name()] = data.val();
+
+
+            });
+
+
+
+
+            
+
+
+
+            window.requestAnimationFrame(Draw);
+           
         });
+
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min)) + min;
+        }
     </script>
 
     </body>
