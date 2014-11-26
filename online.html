@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat Example</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+
+    var conn;
+
+
+	var myCanvas = document.getElementById('drawing-canvas');
+            var myContext = myCanvas.getContext ? myCanvas.getContext('2d') : null;
+            myContext.fillStyle = "blue";
+
+
+            var keystate = {87:false, 65:false, 83:false, 68:false};
+
+
+	var starttime = new Date();
+            var oldtime = new Date();
+
+            var stride = 100;
+
+	var s = { x: 400, y: 400 };
+
+            var width = myCanvas.width;
+            var height = myCanvas.height;
+
+
+	function Draw() {
+
+                var newtime = new Date();
+
+                var dt = (newtime - oldtime)/1000.0;
+
+
+
+
+                myref.set(s);
+                //console.log(s.x);
+
+                if (keystate[87]) {
+                    s.y -= (stride * dt)|0;
+
+                }
+                if (keystate[83]) {
+                    s.y += (stride * dt)|0;
+
+                }
+                if (keystate[65]) {
+                    s.x -= (stride * dt)|0;
+
+                }
+                if (keystate[68]) {
+                    s.x += (stride * dt)|0;
+
+                }
+
+                conn.send({ id: $('#msg').val(), s: s });
+
+                var temp;
+
+                myContext.clearRect(0,0,myCanvas.width, myCanvas.height)
+
+                for (var property in divlist) {
+                    if (divlist.hasOwnProperty(property)) {
+
+                        temp = divlist[property];
+
+                        console.log(property);
+
+                        myContext.fillRect(temp.x|0, temp.y|0, 10, 10);
+
+                    }
+                }
+
+
+
+                //div.offset({ top: s.y, left: s.x });
+
+
+
+
+                oldtime = newtime;
+
+                window.requestAnimationFrame(Draw);
+
+            };
+
+	Draw();
+            //87 65 83 68
+
+
+            $(document).on("keydown", function (e) {
+
+
+
+                keystate[e.which] = true;
+
+                
+
+
+            });
+
+
+
+            $(document).on("keyup", function (e) {
+
+                keystate[e.which] = false;
+
+            });
+
+
+
+
+
+
+
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://212.47.239.127:8080/ws");
+        conn.onclose = function(evt) {
+            console.log($("<div><b>Connection closed.</b></div>"));
+        }
+        conn.onmessage = function(evt) {
+            console.log(evt.data);
+        }
+    } else {
+        console.log(("<div><b>Your browser does not support WebSockets.</b></div>"));
+    }
+    });
+    </script>
+    <style type="text/css">
+
+    </style>
+</head>
+<body>
+    <canvas id="drawing-canvas" width="480" height="420"></canvas>
+
+    <div id="log"></div>
+    <form id="form">
+        <input type="submit" value="Send" />
+        <input type="text" id="msg" size="64" />
+    </form>
+</body>
+</html>

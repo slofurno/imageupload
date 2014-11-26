@@ -448,6 +448,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
             return out;
         };
 
+
+
         /**
          * Calculates the dot product of two vec2's
          *

@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script data-main="Scripts/main" src="Scripts/require.js"></script>
+</head>
+<body>
+
+    <canvas id="ctx" width="800" height="600"></canvas>
+
+
+    <div class="carousel">
+        <!-- Carousel markup -->
+    </div>
+    <script>
+
+        require(['main'], function () {
+            require(['selectmap'], function (SelectMap) {
+                new SelectMap(document.getElementById('ctx'));
+        
+            });
+        });
+
+
+       
+
+    </script>
+  
+
+</body>
+</html>
